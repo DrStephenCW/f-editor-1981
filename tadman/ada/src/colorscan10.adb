@@ -1,0 +1,304 @@
+with defs; use defs;  -- port: for put(integer)
+
+package body colorscan10 is
+    esc: character;
+
+    procedure init is begin
+	esc := character'val(27);  --escape character
+	put(esc);			-- reset terminal characteristics
+	put('<');			-- from: emacs: TrmVT100.c
+	put(esc);
+	put("[r");
+	put(esc);
+	put("[m");
+	put(esc);
+	put("[?4l");
+	put(esc);
+	put("[?6l");
+	put(esc);
+	put("[2J");
+	--	printf ("\033<\033[r\033[m\033[?4l\033[?6l\033[2J");
+    end;
+
+    procedure escape_bracket is
+    begin
+	put(esc);  put('[');
+    end escape_bracket;
+
+    procedure erase_display(
+	    op: in erase_option) is
+    begin
+	escape_bracket;
+	put(erase_option'pos(op));
+	put('J');
+    end erase_display;
+
+    procedure erase_line(op: in erase_option) is
+    begin
+	escape_bracket;
+	put(erase_option'pos(op));
+	put('K');
+    end erase_line;
+
+    procedure set_tab is
+    begin
+	escape_bracket;  put('H');
+    end set_tab;
+
+    procedure clear_tab is
+    begin
+	escape_bracket;  put('g');
+    end clear_tab;
+
+    procedure clear_all_tabs is
+    begin
+	escape_bracket;  put("3g");
+    end clear_all_tabs;
+
+    procedure invoke_cursor_position_report is
+    begin
+	escape_bracket;  put(6);  put('n');
+    end invoke_cursor_position_report;
+
+    procedure cursor_left(n: in integer) is
+    begin
+	escape_bracket;  put(n);  put('D');
+    end cursor_left;
+
+    procedure cursor_right(n: in integer) is
+    begin
+	escape_bracket;  put(n);  put('C');
+    end cursor_right;
+
+    procedure cursor_up(n: in integer) is
+    begin
+	escape_bracket;  put(n);  put('A');
+    end cursor_up;
+
+    procedure cursor_down(n: in integer) is
+    begin
+	escape_bracket;  put(n);  put('B');
+    end cursor_down;
+
+    procedure cursor_home is
+    begin
+	escape_bracket;  put('H');
+    end cursor_home;
+
+    procedure set_cursor(r, c: in integer) is
+    begin
+	escape_bracket;
+	put(r);
+	put(';');
+	put(c);
+	put('H');
+    end set_cursor;
+
+    procedure line_feed_mode_lf_only is
+    begin
+	escape_bracket;  put(20);  put('l');
+    end line_feed_mode_lf_only;
+
+    procedure line_feed_mode_cr_lf is
+    begin
+	escape_bracket;  put(20);  put('h');
+    end line_feed_mode_cr_lf;
+
+    procedure index is
+    begin
+	put(esc);  put('D');
+    end index;
+
+    procedure reverse_index is
+    begin
+	put(esc);  put('M');
+    end reverse_index;
+
+    procedure next_line is
+    begin
+	put(esc);  put('E');
+    end next_line;
+
+    procedure save_cursor_attributes is
+    begin
+	put(esc);  put(7);
+    end save_cursor_attributes;
+
+    procedure restore_cursor_attributes is
+    begin
+	put(esc);  put(8);
+    end restore_cursor_attributes;
+
+    procedure double_high_top_half is
+    begin
+	put(esc);  put("#3");
+    end double_high_top_half;
+
+    procedure double_high_bottom_half is
+    begin
+	put(esc);  put("#4");
+    end double_high_bottom_half;
+
+    procedure double_wide is
+    begin
+	put(esc);  put("#6");
+    end double_wide;
+
+    procedure single_width is
+    begin
+	put(esc);  put("#5");
+    end single_width;
+
+    procedure all_leds_off is
+    begin
+	escape_bracket;  put(0);  put('q');
+    end all_leds_off;
+
+    procedure led1_on is
+    begin
+	escape_bracket;  put(1);  put('q');
+    end led1_on;
+
+    procedure led2_on is
+    begin
+	escape_bracket;  put(2);  put('q');
+    end led2_on;
+
+    procedure led3_on is
+    begin
+	escape_bracket;  put(3);  put('q');
+    end led3_on;
+
+    procedure led4_on is
+    begin
+	escape_bracket;  put(4);  put('q');
+    end led4_on;
+
+    procedure auto_repeat_on is
+    begin
+	escape_bracket;  put("?8h");
+    end auto_repeat_on;
+
+    procedure auto_repeat_off is
+    begin
+	escape_bracket;  put("?8l");
+    end auto_repeat_off;
+
+    procedure column_132 is
+    begin
+	escape_bracket;  put("?3h");
+    end column_132;
+
+    procedure column_80 is
+    begin
+	escape_bracket;  put("?3l");
+    end column_80;
+
+    procedure cursor_application_mode_on is
+    begin
+	escape_bracket;  put("?1h");
+    end cursor_application_mode_on;
+
+    procedure cursor_application_mode_off is
+    begin
+	escape_bracket;  put("?1l");
+    end cursor_application_mode_off;
+
+    procedure key_pad_application_mode_on is
+    begin
+	put(esc);  put('=');
+    end key_pad_application_mode_on;
+
+    procedure key_pad_numeric_mode_on is
+    begin
+	put(esc);  put('7');
+    end key_pad_numeric_mode_on;
+
+    procedure origin_relative is
+    begin
+	escape_bracket;  put("?6h");
+    end origin_relative;
+
+    procedure origin_absolute is
+    begin
+	escape_bracket;  put("?6l");
+    end origin_absolute;
+
+    procedure screen_reverse is
+    begin
+	escape_bracket;  put("?5h");
+    end screen_reverse;
+
+    procedure screen_normal is
+    begin
+	escape_bracket;  put("?5l");
+    end screen_normal;
+
+    procedure smooth_scrolling is
+    begin
+	escape_bracket;  put("?4h");
+    end smooth_scrolling;
+
+    procedure jump_scrolling is
+    begin
+	escape_bracket;  put("?4l");
+    end jump_scrolling;
+
+    procedure wraparound_on is
+    begin
+	escape_bracket;  put("?7h");
+    end wraparound_on;
+
+    procedure wraparound_off is
+    begin
+	escape_bracket;  put("?7l");
+    end wraparound_off;
+
+    procedure use_ascii_character_set is
+    begin
+	put(esc);  put("(B");
+    end use_ascii_character_set;
+
+    procedure use_special_graphics is
+    begin
+	put(esc);  put("(0");
+    end use_special_graphics;
+
+    procedure set_color(
+	    foreground, background: in color) is
+    begin
+	escape_bracket;
+	put(color'pos(foreground) + 10);
+	put(';');
+	put(color'pos(background) + 20);
+	put('m');
+    end set_color;
+
+    procedure video_attributes(
+	    attr: in video_attribute) is
+    begin
+	escape_bracket;
+	case attr is
+	when primary =>  put('0');
+	when bold =>  put('1');
+	when underscore =>  put('4');
+	when blink =>  put('5');
+	when reverse_video =>  put('7');
+	when others =>  put('0');
+	end case;
+	put('m');
+    end video_attributes;
+
+    procedure scrolling_region(
+	    top, bottom: in integer) is
+    begin
+	escape_bracket;
+	put(top);
+	put(';');
+	put(bottom);
+	put('r');
+    end scrolling_region;
+
+begin
+	init;
+end colorscan10;
