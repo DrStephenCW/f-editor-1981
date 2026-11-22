@@ -1,0 +1,419 @@
+	Documentation for the F editor for Unix, "nf".
+			     By
+			Stephen Willson
+		  Halloween, October 31, 1981
+
+		Last update:  September 15, 1982
+
+
+
+
+*** **  *** F for Unix: nf: a "tutorial introduction".  *** ** ***
+
+This editor is based on the editor by Stephen Willson and Eric Olsen
+for the UCSD Pascal system, which in turn is based on the editor by
+James R. Meehan for the Dec-10 and Dec-20 systems at UCI.  These editors
+are written in C, UCSD Pascal, IMP10, and IMP20 respectively.  The command
+structure is basically the same for all of these editors, however, the
+editors by Willson and Olsen, and by Willson keep the entire file in
+memory, whereas the editors by Meehan do not.
+
+The Vax/Unix system is supportive of an editor that keeps the entire file
+in memory, as the Vax supports a huge virtual address space.  Unix also
+can read and write the file to and from memory with great speed, and so
+i/o overhead is minimal.
+
+Warning:  you must set the environment variable "term" to the correct
+value before using nf.  See the note toward the end of this documentation.
+
+There are two editing buffers, called the "editing" buffer and the "put"
+buffer.  The editing buffer holds the current image of the file.  The
+put buffer stores deleted or copied text.  Text copied from the put
+buffer to the editing buffer is INSERTED into the editing buffer.
+Text copied from the editing buffer to the put buffer REPLACES text in
+the put buffer.  Presently, the editing buffer is 100,000 bytes in size
+and the put buffer is 50,000 bytes in size.
+
+The basic design of the editor supports the "what you see is what you
+get" philosophy of editing.  The editor behaves as if the terminal
+screen is a piece of glass 80 columns by 23 lines which can be moved
+about over the text of the file as if that text were printed out on a
+sheet of paper.  This piece of glass, or window, as it is known, can be
+moved about to show different parts of the file.  When an editing
+session is started, the "window" is placed over the top left part of
+the imaginary piece of paper that represents the text in the file.
+
+The following pictures may prove instructive:
+
+       |-----------------|
+       |This is a test of|the emergency broadcasting system.
+       |Now is the time f|r all good men to come to the aid
+       |of their party.  |he quick brown fox jumped.
+       |-----------------|
+
+			 |----------------|
+	This is a test of|the emergency br|adcasting system.
+	Now is the time f|r all good men t| come to the aid
+	of their party.  |he quick brown f|x jumped.
+			 |----------------|
+
+
+       |-----------------|the emergency broadcasting system.
+       |Now is the time f|r all good men to come to the aid
+       |of their party.  |he quick brown fox jumped.
+       |                 |
+       |-----------------|
+
+If we had the above text in the editing buffer, but only a 20 column
+by 3 line window, then the window would start out over the text as
+show in the first picture.  The second picture shows the window
+slid to the right (which makes the text appear to move to the left),
+and the last picture shows the window moved down one line.
+
+The editor is invoked with the following incantation:
+
+	% nf <optional options> <optional filename>
+
+Of course, the percent sign is printed by the shell.
+	    
+The <optional options> are described toward the end of this document.
+
+This will cause the editor to read in the file (if given and if it exists),
+and to position the window at the start of the file.  If the file doesn't
+exist, then it is assumed that you want to create a new file, and
+the editor positions the window at the beginning of an empty editing
+buffer.  If the file is not given at all, the editor assumes you will
+make up a name later (using the "rename" command), and allows you to
+enter text as if you had given a non-existant filename.
+
+At this point, any command can be given.  Just briefly, you will want to
+know the following commands:
+
+	<exit> control-z        Leave the editor, saving the file
+				if it was modified.
+
+	<interrupt> control-c   Asks if you really want to quit, and
+				if you do, leaves the editor without updating
+				your file.
+
+	<redraw> control-u      Redraw the screen; used in case some 
+				communication problem messes the picture
+				up.
+
+	<move> arrows           The cursor arrows located on the keyboard
+				move the
+				cursor around on the screen.  This is the
+				primary method of moving the attention of
+				the editor around on the current windowful
+				of text.  The next editor command will take
+				place (if appropriate) at the spot in the
+				file indicated by the flashing cursor.
+
+	<change> printing       Typing any printing character will replace
+		 characters     the character currently under the flashing
+				cursor with the new character, and move
+				the cursor one place to the right.  The cursor
+				will move to the next line if the replaced
+				character is in column 80.
+
+Using just these commands, you can read in a file and alter the first page
+of text simply by moving the cursor to the position on the screen where
+you want to make a change, and then typing a character that will REPLACE
+the existing characters.  You can abort your editing session, or you can
+save your changes.
+
+You will soon find the need to move the text window, as you add more and
+more text.  This is done with the following commands:
+
+	<gotoend> control-p     Move the window so that the end of the file
+				will be near the top of the window.
+
+	<gotostart> control-o   Move the window so that it is positioned over
+				the beginning of the file.  This function
+				also performs some house-keeping functions to
+				ensure that the internal representation of
+				the file matches the position being displayed
+				on the screen.
+
+	<pluspage> control-l	Pressing the clear key will move the window
+				one page further into the file.
+
+	<minuspage> control-q   Moves the window one page toward the beginning
+				of the file.
+
+	<pluslines> control-t   Moves the window 7 lines further into the file.
+
+	<minuslines> control-w  Moves the window 7 lines closer to the beginning
+				of the file.
+
+	    
+In short order, you will find that simply replacing text is insufficient
+for your editing needs.  You will then want to know the following commands:
+
+	<insertchar> control-a  Inserts one space before the character
+				under the flashing cursor.
+
+	<deletechar> control-s  Removes the character under the flashing
+				cursor.
+
+	<insertline> control-d  Inserts a carriage return before the character
+				under the flashing cursor.
+
+	<deleteline> control-f  Will delete characters up to and including
+				the next carriage return.
+
+
+Text deleted by <deleteline> only will be placed in the put buffer.
+The contents of this buffer can be manipulated in the following ways:
+
+	<put> control-g         Inserts the characters from the put buffer
+				before the character under the flashing
+				cursor.
+	    
+	<pick> control-k        Will copy characters from and including
+				the character under the flashing cursor up to
+				and including the next carriage return into
+				the put buffer.
+
+It is possible to search for text using these two commands:
+
+	<+search> control-r     Will place the cursor at the beginning
+				of the text that matches the search argument
+				(see below) by skipping the character under
+				the flashing cursor and searching forward
+				in the file.  Character case is ignored.
+
+	<-search> control-e     Does the same thing, but searches backwards.
+				There is a bug in this command.  It will
+				place the cursor at the beginning of the
+				line in which the search argument was found,
+				instead of at the beginning of the text.
+				This will be fixed when and if get I
+				around to it.
+
+The argument to either command is entered by pressing the escape key followed
+by the text to be searched for followed by the command key control-e or 
+control-r.  
+	Note: on some terminal types, the escape key is entered by pressing
+	a different key.  On z19's, this key is "f1".  On colorscan-10's, 
+	this key is "pf4".
+If no argument is given, the last argument to either command
+will be used.  If no argument has been given, an error will result, and your
+entire file will be deleted.  (Just kidding.)
+
+There are three other commands that can be used to move the cursor around 
+on the screen, and you will soon want to use these, which are the following:
+
+	<eol> control-v         Move the cursor to the end of the line or
+				the right edge of the window, 
+				whichever comes first.
+
+	<tab> tab               Move the cursor to the next tabstop or the
+	control-i               end of the window, whichever comes first.
+				Tabs stops are every eight characters.
+
+	<home>                  Pressing the home key will place the cursor
+	control-y               in the top left corner of the window screen.
+
+To switch to another file, use the <setfile> command.
+
+	<setfile> control-b     Switch to last file.  If you give this
+				an argument, then it will set to the
+				file you name.
+
+Sometimes (for instance, if you try to edit a write protected file), you
+will find that the editor won't let you save your editing changes.  This
+can be overcome using the command described below:
+
+	<rename> control-x/     Changes the file name that the editor
+		 control-b	will use to save your file.  This can
+				also be used to set the name if no name
+				was given at the start of the editing 
+				session. (Note: control-x/control-b
+				means to hit control-x and then
+				control-b and NOT to hit control-x OR
+				control-b.)
+
+If you want to write your changes on a different file, use the <rename>
+command before using the <exit> command.
+
+You will soon find it tedious to only be able to insert or delete one
+character or one line.  Actually, you can give any of these commands
+(and <put> and <pick>) an argument, which is done as follows:
+
+	Press the escape key.  (This echoes as an asterisk "*".)
+	(See the Note above about the escape key on different terminals.)
+
+	Do one and only one of the following:
+
+		Move the cursor keys, or
+		Type a number, or
+		Type some text (printing characters only)
+
+	Then type the key that activates the command you want to have
+	this argument apply to.  The command will be executed using
+	the argument (if it makes sense), and then the argument will
+	be forgotten.  (Note how this is different from other versions
+	of F: they remember arguments and make them the new default
+	values.)
+
+Doing one of the three things mentioned above will have the following effects:
+
+	Moving the cursor using the arrow and home keys:
+
+		For insert/delete spaces: Only the left and right keys
+			may be used, and will indicate the number of spaces
+			to insert.  Simply typing <escape> means to enter one
+			space.  Escape followed by three right arrows will
+			insert four spaces.  (The escape counts as one space.)
+
+		For insert/delete lines: The vertical displacement downward
+			in the file indicates the number of carriage returns
+			to be inserted or deleted.  The horizontal displacement
+			from the left margin indicates how many spaces should
+			be inserted or deleted after the lines have been
+			changed.  An exception:  if no vertical displacement
+			is indicated, then the horizontal displacement is taken
+			from the original cursor position, as for insert/
+			delete spaces above.
+
+		For pick: This will cause <pick> to pick up the text indicated
+			using the same scheme as for insert/delete lines above.
+
+
+	Entering a number:
+
+		For all the functions above, indicates the number of
+		characters or lines to be inserted or deleted or picked
+		up as appropriate for each command.  For <pick> this refers
+		to the number of lines to be picked up.
+
+		For <pluspage> and <minuspage> this reflects the number
+		of pages to be skipped, and for <plusline> and <minusline>
+		this reflects the number of lines to move the window.
+
+
+	Entering some text:
+
+		For put: This will place the text into the put buffer
+		REPLACING whatever text existed in the put buffer, and
+		then will <put> the text (without a carriage return)
+		into the editing buffer before the character under the
+		flashing cursor.  This is a handy way to insert text.
+
+		As mentioned above, typing <escape>text and then one
+		of the search commands or <setfile> will change the
+		parameter of that command as appropriate.  (The argument
+		to the search commands is not forgotten.  This is an
+		exception to the rule.)
+
+If you decide you want to leave parameter mode, as it is called after you
+have typed an escape, then you may type control-c to return to the normal
+editing mode.  If you should type two control-c's by accident, then you will
+be prompted to see if you really want to leave the editor.
+
+
+*** <optional options> (these are not case sensitive)
+
+-txxx	set terminal type to xxx
+-hnn	set terminal height nn
+-rnn	put cursor at row nn initially
+-cnn	put cursor at column nn initially
+-emess	display mess on the bottom line of the screen at startup
+	(should be enclosed in quotes thus: "-eToo many right paren's")
+
+
+*** The editor has the following known bugs:
+
+	<-Search> puts the cursor at the beginning of the line instead of
+	at the desired text.  In fact, <-Search> is a bit flaky all around.
+
+	Makefiles get blown away when edited by nf.  This seems to have
+	something to do with the fact that tabs are removed.  Very strange.
+	You can fix up a destroyed Makefile with the program "unexpand."
+
+	Tabs are removed and replaced with the appropriate number of spaces.
+	You can have extra spaces converted to tabs by using the program
+	"unexpand."
+
+	If the editor can not read the file specified in the command line
+	then it acts as if the file does not exist, even if it is simply
+	read protected.  You may find you'll need to use <rename>
+	to make it possible to save any changes you've made in another file.
+
+Other things:
+
+	The escape key can be used repeatedly to enter an argument.  Typing
+	three escapes is the same as typing one escape and two right arrows.
+
+	The erase eol key (on Datamedias) prints some uninteresting
+	information about the editing buffers.
+
+	The rubout key is treated the same as the backspace key, which is
+	identical to the left arrow key.  The linefeed key is the same as
+	down arrow.  Carriage return can be used in arguments to mean 
+	"linefeed and move to start of line", as you might expect.
+
+	Moving the cursor arrows to the edge of the window will cause them
+	to stop at the edge of the window, except for the down arrow which 
+	automatically scrolls the screen 7 lines.
+
+	The editor is called "nf" instead of "f" because "f" is an
+	abbreviation for the "finger" command.  "nf" stands for 
+	"intuitive feeling", which is a personality type in the scheme of
+	Keirsey and Bates.
+
+	If you are fortunate enough to be using a heathkit terminal (a Z19)
+	then you can use the special functions keys on the right side of the
+	terminal to speed things up.  "ic" will insert a character using
+	the smarts of the terminal.  "dc" deletes a character.  "il" inserts
+	a line.  "dl" deletes a line.  
+
+Choosing a terminal type:
+
+	Nf supports the following types of terminals:
+		Terminal	Name
+		--------	----
+		dm1520		dm1520
+		heath/z19	heath
+		colorscan-10	vt100
+
+For nf to work properly, you must use the shell command "set" to set the
+environment variable "term" to the correct name, above.  For instance,
+
+	% set term=heath
+
+if you are using a z19 or a heathkit terminal.  If an unknown type of
+terminal is specified, you will end up in "vi".  To escape from "vi",
+type two capital Z's, and you should be all right.
+
+Implementation notes:
+
+	The editor is implemented using the following scheme:
+
+	The editing buffer is divided into two parts, refered to as the
+	left stack and the right stack.  The left stack contains characters
+	to the left of the cursor, and similarly for the right stack.
+	The top of one of the stacks (I forget which one) is the current
+	character.
+
+	Using this technique, insertions and deletions are done by
+	quite local manipulations of either stack, and movement in
+	the file is done by pushing and popping the stacks in parallel.
+
+	This makes file movement somewhat more expensive than insertions and
+	deletions, but some optimizations have been made (the stacks are
+	not actually pushed and popped in parallel).  Fortunately, the
+	Vax is so fast this is of little trouble.
+
+Finally
+
+	This editor was not directly supported by any grant, but was written
+	to support work for the Programming Environments Research Project
+	at UCI under the direction of Thomas A. Standish.  This editor may
+	be distributed without restriction, so long as credit is given to
+	the author, the Programming Environments Project, and the Department
+	of Information and Computer Science at the University of California
+	at Irvine.  No intention of support should be implied by the existence
+	of this document, and in particular, the author cannot guarantee that
+	his software is appropriate for your intended use.

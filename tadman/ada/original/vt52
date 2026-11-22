@@ -1,0 +1,4 @@
+procedure vt52 is
+begin
+    put(esc);  put("[?2l");
+end vt52;
