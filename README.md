@@ -1,5 +1,7 @@
 # F editor (nf), UC Irvine, 1981-84
 
+_The text below and the original source was recovered from a dump of a PDP-10 9-track magnetic tape by Claude Opus 5.5 Medium Effort.  The updates and the documentation here were also done by Claude._
+
 A full-screen, keep-the-whole-file-in-memory text editor that Steve Willson
 wrote in C for VAX/Unix at UC Irvine in October 1981 ("Halloween" is the date on
 its manual), last changed September 1982. It is the fourth editor in a family
