@@ -111,3 +111,23 @@ with Eric Olsen. Ada version by Frank Tadman. The manual's own terms: "This
 editor may be distributed without restriction, so long as credit is given to the
 author, the Programming Environments Project, and the Department of Information
 and Computer Science at the University of California at Irvine."
+
+## Addendum
+(This part written by Stephen.)
+There was a company called Dayflo that created a very early version of a Hypertext system.
+The product had the same name.  At the time, it had the largest funding of any software
+startup in Orange County, CA.  Something like $10M!  That was a fortune back then!
+
+Well, this one time, at band camp, they called me up to do some
+consulting on a project they were making - some kind of database.  They were having trouble
+with the front end editor.  So I show up and I'm looking at the code and it is kind of strange
+but it eventually dawns on me that this is in fact a derivative of the C version of the F
+editor I had written (documented here).  The programmers there didn't understand how the two stacks worked
+and had all kinds of hacks to track locations in the text.  All you needed was "distance from
+start" or "distance from end"; and it was easy to swap between these as the focus of the
+editor moved around.  So I refactored all that to work correctly.
+
+At nearly the same time they hired a woman as a permanent employee to 'own' the editor
+going forward.  I taught her how the architecture was supposed to work and we
+collaborated together on cleaning the thing up.  Ah, um, er,
+we became "not just friends," and later got married, and we're still married.
